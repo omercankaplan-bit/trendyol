@@ -81,9 +81,17 @@ class HttpClient(Protocol):
 class BrowserClient:
     """`HttpClient` backed by curl_cffi with a real browser fingerprint."""
 
-    def __init__(self, *, timeout_s: float, impersonate: str = DEFAULT_IMPERSONATE) -> None:
+    def __init__(
+        self,
+        *,
+        timeout_s: float,
+        impersonate: str = DEFAULT_IMPERSONATE,
+        proxy: str | None = None,
+    ) -> None:
         self._session: AsyncSession[Response] = AsyncSession(
-            impersonate=impersonate, timeout=timeout_s
+            impersonate=impersonate,
+            timeout=timeout_s,
+            proxies={"http": proxy, "https": proxy} if proxy else None,
         )
 
     async def get(

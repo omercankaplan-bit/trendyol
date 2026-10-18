@@ -60,7 +60,7 @@ def test_network_errors_covers_both_transports():
 async def test_browser_client_impersonates_chrome(fake_session: FakeSession):
     client = BrowserClient(timeout_s=12.5)
 
-    assert fake_session.init_kwargs == {"impersonate": "chrome", "timeout": 12.5}
+    assert fake_session.init_kwargs == {"impersonate": "chrome", "timeout": 12.5, "proxies": None}
 
     await client.aclose()
 
@@ -89,3 +89,18 @@ async def test_browser_client_omits_empty_headers(fake_session: FakeSession):
     assert fake_session.get_calls == [
         ("https://example.test/y", {"headers": None, "allow_redirects": True})
     ]
+
+
+async def test_browser_client_routes_both_schemes_through_the_proxy(fake_session: FakeSession):
+    BrowserClient(timeout_s=5.0, proxy="http://user:pw@proxy.test:8080")
+
+    assert fake_session.init_kwargs["proxies"] == {
+        "http": "http://user:pw@proxy.test:8080",
+        "https": "http://user:pw@proxy.test:8080",
+    }
+
+
+async def test_browser_client_connects_directly_without_a_proxy(fake_session: FakeSession):
+    BrowserClient(timeout_s=5.0)
+
+    assert fake_session.init_kwargs["proxies"] is None

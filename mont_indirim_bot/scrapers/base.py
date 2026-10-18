@@ -49,6 +49,9 @@ __all__ = [
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_TIMEOUT_S = 20.0
 
+#: Marketplaces carry the product id in the path, as `...-p-<id>`.
+PRODUCT_ID_PATTERN = re.compile(r"-p-([A-Za-z0-9]+)")
+
 #: How many characters of an unparsable document are logged (see `_document_head`).
 DOCUMENT_HEAD_CHARS = 160
 
@@ -369,6 +372,7 @@ class BaseScraper(Scraper):
         timeout_s: float = DEFAULT_TIMEOUT_S,
         user_agents: Sequence[str] = DEFAULT_USER_AGENTS,
         rng: random.Random | None = None,
+        proxy: str | None = None,
     ) -> None:
         """
         Args:
@@ -378,6 +382,7 @@ class BaseScraper(Scraper):
             timeout_s: HTTP timeout of the internally created client.
             user_agents: Rotating UA pool.
             rng: Injectable RNG so tests are deterministic.
+            proxy: Optional proxy URL for the requests (`None` = direct).
         """
         self._min_delay_s = max(0.0, min_delay_s)
         self._max_delay_s = max(self._min_delay_s, max_delay_s)
@@ -385,6 +390,7 @@ class BaseScraper(Scraper):
         self._timeout_s = timeout_s
         self._user_agents = tuple(user_agents) or DEFAULT_USER_AGENTS
         self._rng = rng or random.Random()  # jitter and UA rotation, not security
+        self._proxy = proxy or None
 
     # -- public API -------------------------------------------------------- #
     def api_url(self, url: str) -> str | None:
@@ -394,7 +400,7 @@ class BaseScraper(Scraper):
     async def fetch(self, url: str, *, client: HttpClient | None = None) -> PriceResult:
         """Measure the price of `url`, preferring JSON over HTML."""
         owns_client = client is None
-        http: HttpClient = client or BrowserClient(timeout_s=self._timeout_s)
+        http: HttpClient = client or BrowserClient(timeout_s=self._timeout_s, proxy=self._proxy)
         try:
             return await self._fetch_pipeline(http, url)
         finally:
@@ -416,6 +422,7 @@ class BaseScraper(Scraper):
                     LOGGER.info("[%s] JSON payload unusable (%s); using HTML", self.name, exc)
 
         html = await self._get_text(http, url)
+        self._ensure_product_page(url, html)
 
         for variable in self.embedded_json_vars:
             payload = extract_json_assignment(html, variable)
@@ -441,6 +448,21 @@ class BaseScraper(Scraper):
                 _document_head(html),
             )
             raise
+
+    def _ensure_product_page(self, url: str, html: str) -> None:
+        """Reject a document that is not about the requested product.
+
+        A discontinued product often redirects to a listing page, which carries
+        plenty of prices of its own; without this check one of them would quietly
+        become the price of the watched item.
+        """
+        expected = product_id(url)
+        if expected and expected.lower() not in html.lower():
+            msg = (
+                f"page does not mention product {expected}; the product was removed "
+                "or the site served a placeholder page"
+            )
+            raise ScraperParseError(msg)
 
     async def _get_json(self, http: HttpClient, url: str) -> Any:
         response = await self._request(http, url)
@@ -542,29 +564,48 @@ class BaseScraper(Scraper):
         )
 
     def parse_json_ld(self, html: str, url: str) -> PriceResult | None:
-        """Try the schema.org product markup, returning `None` when absent."""
-        for document in extract_json_ld(html):
+        """Try the schema.org product markup, returning `None` when absent.
+
+        The document's own product node wins over nested ones. Trendyol wraps
+        every colourway of a garment in a `ProductGroup` whose `hasVariant`
+        entries each carry their own price, and the first variant is usually a
+        different colour, so starting with the nested nodes reported the price
+        (and the name) of the wrong variant.
+        """
+        documents = extract_json_ld(html)
+        for document in documents:
+            for candidate in _iter_document_nodes(document):
+                result = self._result_from_json_ld(candidate, url)
+                if result is not None:
+                    return result
+        for document in documents:
             for candidate in _iter_mappings(document):
-                if not _looks_like_product(candidate):
-                    continue
-                offers = candidate.get("offers")
-                price = _offer_price(offers)
-                if price is None:
-                    continue
-                list_price = _offer_price(offers, key="highPrice")
-                if list_price is not None and list_price <= price:
-                    list_price = None
-                name = candidate.get("name")
-                return PriceResult(
-                    product_name=strip_html(name) if isinstance(name, str) else "",
-                    price=price,
-                    list_price=list_price,
-                    currency=_offer_currency(offers) or DEFAULT_CURRENCY,
-                    in_stock=_offer_in_stock(offers),
-                    url=url,
-                    source="json-ld",
-                )
+                result = self._result_from_json_ld(candidate, url)
+                if result is not None:
+                    return result
         return None
+
+    def _result_from_json_ld(self, candidate: Any, url: str) -> PriceResult | None:
+        """Build a `PriceResult` from one JSON-LD node, `None` when unusable."""
+        if not isinstance(candidate, Mapping) or not _looks_like_product(candidate):
+            return None
+        offers = candidate.get("offers")
+        price = _offer_price(offers)
+        if price is None:
+            return None
+        list_price = _offer_price(offers, key="highPrice")
+        if list_price is not None and list_price <= price:
+            list_price = None
+        name = candidate.get("name")
+        return PriceResult(
+            product_name=strip_html(name) if isinstance(name, str) else "",
+            price=price,
+            list_price=list_price,
+            currency=_offer_currency(offers) or DEFAULT_CURRENCY,
+            in_stock=_offer_in_stock(offers),
+            url=url,
+            source="json-ld",
+        )
 
     def parse_html_regex(self, html: str, url: str) -> PriceResult:
         """Last resort: pull the price out of the rendered HTML."""
@@ -622,6 +663,28 @@ class BaseScraper(Scraper):
         return True
 
 
+def product_id(url: str) -> str | None:
+    """Return the marketplace product id inside `url`, or `None`."""
+    match = PRODUCT_ID_PATTERN.search(url)
+    return match.group(1) if match else None
+
+
+def _iter_document_nodes(node: Any) -> Iterable[Any]:
+    """Yield the top-level nodes of a JSON-LD document.
+
+    A document is either a node, a list of nodes, or an `@graph` wrapper; only
+    those outer nodes are considered, which is what lets a `ProductGroup` outrank
+    its own `hasVariant` children.
+    """
+    if isinstance(node, Mapping):
+        graph = node.get("@graph")
+        if isinstance(graph, list):
+            yield from graph
+        yield node
+    elif isinstance(node, list):
+        yield from node
+
+
 def _iter_mappings(node: Any) -> Iterable[Mapping[str, Any]]:
     """Yield every mapping inside a JSON-LD document, including `@graph`."""
     if isinstance(node, Mapping):
@@ -633,10 +696,15 @@ def _iter_mappings(node: Any) -> Iterable[Mapping[str, Any]]:
             yield from _iter_mappings(entry)
 
 
+#: Schema.org types that carry a buyable offer on a product page. Trendyol uses
+#: `ProductGroup` for a garment whose colourways live under `hasVariant`.
+PRODUCT_TYPES = frozenset({"product", "productgroup"})
+
+
 def _looks_like_product(node: Mapping[str, Any]) -> bool:
     node_type = node.get("@type")
     types = [node_type] if isinstance(node_type, str) else list(node_type or [])
-    return any(str(entry).lower() == "product" for entry in types)
+    return any(str(entry).lower() in PRODUCT_TYPES for entry in types)
 
 
 def _offer_price(offers: Any, *, key: str = "price") -> float | None:

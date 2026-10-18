@@ -196,6 +196,15 @@ seferlik bir uyarı mesajı gider.
 | `MAX_PARALLEL_REQUESTS`  | `2`        | Aynı anda taranan ürün sayısı (siteyi yormamak için düşük tut) |
 | `DATA_DIR`               | `data`     | Durum dosyalarının klasörü                                    |
 | `LOG_LEVEL`              | `INFO`     | `DEBUG` / `INFO` / `WARNING`                                  |
+| `SCRAPER_PROXY`          | –          | Opsiyonel proxy (`http://kullanıcı:şifre@host:port`)          |
+
+### `SCRAPER_PROXY` neden gerekebilir?
+
+Trendyol, GitHub Actions'ın veri merkezi IP'lerine ürün sayfası yerine **ürün verisi
+içermeyen bir sayfa** döndürüyor (durum kodu yine `200`). Ev/ofis bağlantısında sorun
+yoktur; bot yalnızca Actions'ta Trendyol'u okuyamaz ve ürünler `hata` olarak işaretlenir.
+Yerleşik (residential) ya da Türkiye çıkışlı bir proxy'yi bu secret'a yazarsan Trendyol
+tekrar çalışır. Hepsiburada proxy olmadan da çalışır.
 
 ---
 
@@ -278,6 +287,12 @@ sadece o ürün "error" sayılır, koşu devam eder ve 3 hatadan sonra Telegram'
 - 🏷 Trendyol stokta olmayan ürünler için fiyat alanına `999.999 TL` yer tutucusu yazar.
   Bu yüzden watchlist'e **stokta olan** ürünleri eklemek daha sağlıklıdır (tükenen bir
   ürün stokta dönerse gerçek fiyatıyla güncellenir).
+- 🧾 Kaldırılan bir ürünün adresi kategori sayfasına yönlenebilir; o sayfada onlarca
+  fiyat bulunur. Bot artık sayfada **takip edilen ürünün kimliğini** arar ve bulamazsa
+  ürünü hata olarak işaretler, böylece yanlış fiyat kaydedilmez.
+- 🎨 Trendyol bir ürünün tüm renklerini tek `ProductGroup` altında toplar. Fiyat,
+  adresteki ürünün kendi teklifinden okunur (ilk varyanttan değil), yani takip edilen
+  renk ile bildirimdeki fiyat aynı ürüne aittir.
 - 🚫 Fiyatlar site tarafında "liste fiyatı / indirimli fiyat" olarak farklı gösterilebilir;
   bot ödeme adımındaki kupon/kargo etkisini **hesaba katmaz**.
 

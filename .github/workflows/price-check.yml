@@ -48,6 +48,10 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           MIN_DISCOUNT_PCT: ${{ vars.MIN_DISCOUNT_PCT || secrets.MIN_DISCOUNT_PCT || '20' }}
           COOLDOWN_HOURS: ${{ vars.COOLDOWN_HOURS || '12' }}
+          # Optional: runner IPs are datacenter IPs, and Trendyol serves those a
+          # page without product data. Set this secret to a residential (ideally
+          # Turkish) proxy - `http://user:pass@host:port` - to track Trendyol.
+          SCRAPER_PROXY: ${{ secrets.SCRAPER_PROXY }}
           LOG_LEVEL: INFO
         run: |
           if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] || [ -z "${TELEGRAM_CHAT_ID:-}" ]; then

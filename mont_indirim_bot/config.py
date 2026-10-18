@@ -43,6 +43,7 @@ DEFAULT_MAX_PARALLEL_REQUESTS = 2
 
 ENV_BOT_TOKEN = "TELEGRAM_BOT_TOKEN"
 ENV_CHAT_ID = "TELEGRAM_CHAT_ID"
+ENV_SCRAPER_PROXY = "SCRAPER_PROXY"
 
 
 class ConfigError(RuntimeError):
@@ -65,6 +66,12 @@ class Config:
     max_parallel_requests: int = DEFAULT_MAX_PARALLEL_REQUESTS
     data_dir: Path = DEFAULT_DATA_DIR
     log_level: str = "INFO"
+    scraper_proxy: str | None = None
+    """Optional `http://user:pass@host:port` proxy for the storefront requests.
+
+    GitHub's runners use datacenter IPs, and Trendyol answers those with a page
+    that carries no product data; a residential proxy is the only way around it.
+    """
 
     @property
     def watchlist_path(self) -> Path:
@@ -191,4 +198,5 @@ def load_config(env: Mapping[str, str] | None = None) -> Config:
         max_parallel_requests=parallel,
         data_dir=data_dir,
         log_level=_get_str(source, "LOG_LEVEL", "INFO").upper(),
+        scraper_proxy=_raw(source, ENV_SCRAPER_PROXY),
     )

@@ -108,6 +108,7 @@ class PriceChecker:
                 max_delay_s=config.request_max_delay_s,
                 max_retries=config.max_retries,
                 timeout_s=config.request_timeout_s,
+                proxy=config.scraper_proxy,
             )
         )
         self._notifier = notifier

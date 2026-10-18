@@ -43,6 +43,17 @@ def test_load_config_defaults():
     assert config.watchlist_path.name == "watchlist.json"
     assert config.state_path.name == "state.json"
     assert config.cooldown_hours_seconds == 12 * 3600
+    assert config.scraper_proxy is None
+
+
+def test_load_config_reads_the_optional_proxy():
+    config = load_config({**BASE_ENV, "SCRAPER_PROXY": "http://user:pw@proxy.test:8080"})
+
+    assert config.scraper_proxy == "http://user:pw@proxy.test:8080"
+
+
+def test_load_config_treats_a_blank_proxy_as_unset():
+    assert load_config({**BASE_ENV, "SCRAPER_PROXY": "   "}).scraper_proxy is None
 
 
 def test_load_config_reads_overrides(tmp_path: Path):

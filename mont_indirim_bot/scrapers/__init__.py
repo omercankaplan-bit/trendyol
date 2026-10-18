@@ -13,6 +13,7 @@ from mont_indirim_bot.scrapers.base import (
     ScraperFetchError,
     ScraperParseError,
     normalize_url,
+    product_id,
 )
 from mont_indirim_bot.scrapers.hepsiburada import HepsiburadaScraper
 from mont_indirim_bot.scrapers.trendyol import TrendyolScraper
@@ -30,6 +31,7 @@ __all__ = [
     "find_scraper",
     "is_supported_url",
     "normalize_url",
+    "product_id",
     "supported_site_names",
 ]
 
