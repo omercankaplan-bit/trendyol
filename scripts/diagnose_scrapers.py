@@ -73,6 +73,32 @@ async def main(urls: Sequence[str] = URLS) -> None:
         for impersonate in IMPERSONATIONS:
             await probe(impersonate, url)
 
+    print("\n=== session warm-up (homepage first, cookies kept)")
+    await probe_session(URLS[0])
+
+
+async def probe_session(url: str) -> None:
+    """Visit the homepage first so the session cookie is present, then the page.
+
+    Some bot managers only render server-side data once the client looks like a
+    browser that has already been through the site.
+    """
+    async with AsyncSession(impersonate="chrome", timeout=25) as session:
+        for step, target in (("home", "https://www.trendyol.com/"), ("page", url)):
+            try:
+                response = await session.get(target)
+            except Exception as exc:  # a probe reports whatever happened
+                print(f"warm-{step:<5} EXC       {type(exc).__name__}: {str(exc)[:60]}")
+                continue
+            html = response.text or ""
+            found = [marker for marker in MARKERS if marker in html]
+            prices = PRICE_PATTERN.findall(html)[:2]
+            print(
+                f"warm-{step:<5} {response.status_code} len={len(html):<7} "
+                f"markers={','.join(found) or '-'} prices={prices or '-'} "
+                f"cookies={len(session.cookies)}"
+            )
+
 
 if __name__ == "__main__":
     asyncio.run(main())
