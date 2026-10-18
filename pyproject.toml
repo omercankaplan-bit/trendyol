@@ -1,0 +1,120 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mont-indirim-bot"
+version = "0.1.0"
+description = "Serverless Telegram price tracker for Trendyol and Hepsiburada outdoor wear."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "mont-indirim-bot contributors" }]
+keywords = [
+  "telegram-bot",
+  "price-tracker",
+  "trendyol",
+  "hepsiburada",
+  "github-actions",
+]
+classifiers = [
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Private :: Do Not Upload",
+]
+dependencies = ["httpx>=0.27,<0.29"]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.11",
+  "pytest>=8.2",
+  "pytest-asyncio>=0.24",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+mont-indirim-bot = "mont_indirim_bot.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/OWNER/mont-indirim-bot"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mont_indirim_bot"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "build", "dist"]
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "ANN",
+  "ASYNC",
+  "B",
+  "C4",
+  "E",
+  "F",
+  "I",
+  "N",
+  "PL",
+  "PTH",
+  "RET",
+  "RUF",
+  "SIM",
+  "T20",
+  "UP",
+  "W",
+]
+ignore = [
+  # Dataclass fields are always keyword arguments for this project, so
+  # "boolean is used as a positional argument" cannot happen.
+  "FBT",
+  # Explicit `Any` is required at the JSON parsing boundary.
+  "ANN401",
+  # The user facing text is Turkish on purpose; `ı`, `İ`, `ş`, `ℹ` are not typos.
+  "RUF001",
+  "RUF002",
+  "RUF003",
+  # Comparing against literals (`response.status_code == 429`, `len(tail) == 3`)
+  # is the clearest form for protocol and format checks.
+  "PLR2004",
+]
+
+[tool.ruff.lint.pylint]
+# Constructors and message builders legitimately take a handful of knobs.
+max-args = 7
+max-positional-args = 7
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ANN001", "ANN201", "ANN202", "PLR2004", "S101", "ASYNC240"]
+"scripts/*" = ["T201"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["mont_indirim_bot"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
+files = ["mont_indirim_bot", "scripts", "tests"]
+exclude = ["tests/fixtures/"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+filterwarnings = ["error::DeprecationWarning"]

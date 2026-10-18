@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Tooling caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets / local overrides
+.env
+.env.local
+
+# Logs and scratch files
+*.log
+urls.txt
+
+# Editor / OS noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# NOTE: data/ IS tracked on purpose. The JSON files inside it are the
+# persistent state of the bot (prices, notification history, Telegram offset).
