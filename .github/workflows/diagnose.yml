@@ -1,0 +1,30 @@
+name: Diagnose storefronts
+
+# Manual trigger only. Use it when a scheduled scan starts reporting failures:
+# GitHub's runners come from datacenter IPs and can be treated differently from a
+# home connection, and this prints what each site actually answered.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: Probe the storefronts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the bot
+        run: pip install -e .
+
+      - name: Probe the storefronts
+        run: python scripts/diagnose_scrapers.py
