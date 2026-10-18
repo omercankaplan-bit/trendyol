@@ -300,6 +300,96 @@
       "min_discount_pct": null,
       "added_at": "2026-10-18T18:28:04+00:00",
       "active": true
+    },
+    {
+      "id": "7ab977",
+      "url": "https://www.hepsiburada.com/columbia-ascender-softshell-mont-p-HBCV000099EXLV",
+      "site": "hepsiburada",
+      "title": "Columbia Ascender™ Softshell",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:18+00:00",
+      "active": true
+    },
+    {
+      "id": "078d6a",
+      "url": "https://www.hepsiburada.com/columbia-tech-hybrid-erkek-softshell-p-HBCV000075W0BZ",
+      "site": "hepsiburada",
+      "title": "Columbia Tech Hybrid Erkek",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:21+00:00",
+      "active": true
+    },
+    {
+      "id": "cccebf",
+      "url": "https://www.hepsiburada.com/columbia-cascade-ridge-erkek-outdoor-softshell-wm6885-p-HBCV00006X9CZ1",
+      "site": "hepsiburada",
+      "title": "Columbia Cascade Ridge Erkek Outdoor Softshell",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:24+00:00",
+      "active": true
+    },
+    {
+      "id": "857172",
+      "url": "https://www.hepsiburada.com/columbia-silver-falls-erkek-mont-p-HBCV0000GKRVNR",
+      "site": "hepsiburada",
+      "title": "Columbia Silver Falls Erkek",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:27+00:00",
+      "active": true
+    },
+    {
+      "id": "4a5e56",
+      "url": "https://www.hepsiburada.com/columbia-basin-trail-erkek-siyah-polar-p-HBCV000057UYJ3",
+      "site": "hepsiburada",
+      "title": "Columbia Basin Trail Erkek Siyah",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:30+00:00",
+      "active": true
+    },
+    {
+      "id": "cd7dd6",
+      "url": "https://www.hepsiburada.com/pierre-cardin-erkek-siyah-mont-50325313-vr046-p-HBCV0000ET3HXR",
+      "site": "hepsiburada",
+      "title": "Pierre Cardin Erkek Siyah Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:34+00:00",
+      "active": true
+    },
+    {
+      "id": "8dfe82",
+      "url": "https://www.hepsiburada.com/pierre-cardin-erkek-lacivert-parlak-sisme-mont-50295077-vr033-p-HBCV000073EN62",
+      "site": "hepsiburada",
+      "title": "Pierre Cardin Erkek Lacivert Parlak Şişme Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:37+00:00",
+      "active": true
+    },
+    {
+      "id": "44bb24",
+      "url": "https://www.hepsiburada.com/pierre-cardin-erkek-sari-kapusonlu-spor-mont-50272840-vr044-p-HBCV000058F7AK",
+      "site": "hepsiburada",
+      "title": "Pierre Cardin Erkek Sarı Kapüşonlu Spor Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:41+00:00",
+      "active": true
+    },
+    {
+      "id": "1703de",
+      "url": "https://www.hepsiburada.com/pierre-cardin-erkek-antrasit-kapusonlu-kar-montu-50292545-vr006-p-HBCV00007A3J24",
+      "site": "hepsiburada",
+      "title": "Pierre Cardin Erkek Antrasit Kapüşonlu Kar Montu",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:34:45+00:00",
+      "active": true
     }
   ]
 }
