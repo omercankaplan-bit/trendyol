@@ -17,6 +17,7 @@ import httpx
 
 from mont_indirim_bot.config import Config
 from mont_indirim_bot.scrapers import PriceResult, Scraper
+from mont_indirim_bot.scrapers.http import HttpClient
 from mont_indirim_bot.services.notifier import MARKDOWN_V2_SPECIALS, Alert
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -119,7 +120,7 @@ class FakeScraper(Scraper):
         self.script: list[PriceResult | Exception] = list(script)
         self.calls: list[str] = []
 
-    async def fetch(self, url: str, *, client: httpx.AsyncClient | None = None) -> PriceResult:
+    async def fetch(self, url: str, *, client: HttpClient | None = None) -> PriceResult:
         del client
         self.calls.append(url)
         if not self.script:

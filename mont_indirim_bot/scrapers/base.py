@@ -19,9 +19,13 @@ from dataclasses import dataclass
 from typing import Any, ClassVar
 from urllib.parse import urlsplit, urlunsplit
 
-import httpx
-
 from mont_indirim_bot.prices import DEFAULT_CURRENCY, parse_price
+from mont_indirim_bot.scrapers.http import (
+    NETWORK_ERRORS,
+    BrowserClient,
+    HttpClient,
+    HttpResponse,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -312,7 +316,7 @@ class Scraper(ABC):
         return False
 
     @abstractmethod
-    async def fetch(self, url: str, *, client: httpx.AsyncClient | None = None) -> PriceResult:
+    async def fetch(self, url: str, *, client: HttpClient | None = None) -> PriceResult:
         """Return the current price of `url`.
 
         Raises:
@@ -384,12 +388,10 @@ class BaseScraper(Scraper):
         """Return the JSON endpoint for `url`, or `None` when unsupported."""
         return None
 
-    async def fetch(self, url: str, *, client: httpx.AsyncClient | None = None) -> PriceResult:
+    async def fetch(self, url: str, *, client: HttpClient | None = None) -> PriceResult:
         """Measure the price of `url`, preferring JSON over HTML."""
         owns_client = client is None
-        http = client or httpx.AsyncClient(
-            timeout=httpx.Timeout(self._timeout_s, connect=10.0), follow_redirects=True
-        )
+        http: HttpClient = client or BrowserClient(timeout_s=self._timeout_s)
         try:
             return await self._fetch_pipeline(http, url)
         finally:
@@ -397,7 +399,7 @@ class BaseScraper(Scraper):
                 await http.aclose()
 
     # -- pipeline ---------------------------------------------------------- #
-    async def _fetch_pipeline(self, http: httpx.AsyncClient, url: str) -> PriceResult:
+    async def _fetch_pipeline(self, http: HttpClient, url: str) -> PriceResult:
         api_url = self.api_url(url)
         if api_url:
             try:
@@ -429,7 +431,7 @@ class BaseScraper(Scraper):
 
         return self.parse_html_regex(html, url)
 
-    async def _get_json(self, http: httpx.AsyncClient, url: str) -> Any:
+    async def _get_json(self, http: HttpClient, url: str) -> Any:
         response = await self._request(http, url)
         try:
             return response.json()
@@ -437,11 +439,11 @@ class BaseScraper(Scraper):
             msg = f"HTTP {response.status_code} but the body was not JSON"
             raise ScraperParseError(msg) from exc
 
-    async def _get_text(self, http: httpx.AsyncClient, url: str) -> str:
+    async def _get_text(self, http: HttpClient, url: str) -> str:
         response = await self._request(http, url)
         return response.text
 
-    async def _request(self, http: httpx.AsyncClient, url: str) -> httpx.Response:
+    async def _request(self, http: HttpClient, url: str) -> HttpResponse:
         """GET with politeness delay and exponential backoff on 403/429/5xx."""
         attempt = 1
         headers = self._headers()
@@ -451,7 +453,7 @@ class BaseScraper(Scraper):
             retry_after: float | None = None
             try:
                 response = await http.get(url, headers=headers, follow_redirects=True)
-            except httpx.HTTPError as exc:
+            except NETWORK_ERRORS as exc:
                 failure = ScraperFetchError(f"network error: {type(exc).__name__}")
             else:
                 if response.status_code in RETRYABLE_STATUS_CODES:
@@ -665,7 +667,7 @@ def _offer_in_stock(offers: Any) -> bool:
     return True
 
 
-def _retry_after_seconds(response: httpx.Response) -> float | None:
+def _retry_after_seconds(response: HttpResponse) -> float | None:
     header = response.headers.get("Retry-After")
     if not header:
         return None

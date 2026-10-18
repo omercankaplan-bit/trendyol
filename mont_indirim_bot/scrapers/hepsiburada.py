@@ -1,23 +1,20 @@
 """Hepsiburada scraper.
 
 Product URLs end with `-p-<product code>` (for example `HBCV0000ABCDE`). The
-site has no documented public JSON API, so the pipeline uses the unofficial
-frontend endpoint as the first attempt and then parses the JSON state embedded
-in the HTML document (`window.__PRODUCT_DETAIL_APP_INITIAL_STATE__`) before
-giving up on regular expressions over the markup.
+site sits behind Cloudflare and answers a plain HTTP client with 403 (see
+:mod:`mont_indirim_bot.scrapers.http`), so requests go through a browser
+fingerprint. The unofficial frontend JSON endpoint now returns 404, so the
+pipeline reads the schema.org block (`application/ld+json`) and the
+server-rendered state before falling back to regular expressions over the HTML.
 """
 
 from __future__ import annotations
 
-import re
 from typing import ClassVar
 
 from mont_indirim_bot.scrapers.base import BaseScraper
 
 __all__ = ["HepsiburadaScraper"]
-
-#: Hepsiburada product URLs end with `-p-<alphanumeric code>`.
-PRODUCT_CODE_PATTERN = re.compile(r"-p-([A-Za-z0-9]+)")
 
 JSON_PRICE_KEYS: tuple[str, ...] = (
     "price",
@@ -81,12 +78,9 @@ class HepsiburadaScraper(BaseScraper):
     display_name: ClassVar[str] = "Hepsiburada"
     host_patterns: ClassVar[tuple[str, ...]] = ("hepsiburada.com", "*.hepsiburada.com")
 
-    # Unofficial endpoint used by the site's own frontend. It can disappear at
-    # any time; when it does the pipeline logs at INFO level and falls back to
-    # the embedded JSON / HTML parsing below, so nothing breaks.
-    api_url_template: ClassVar[str | None] = (
-        "https://www.hepsiburada.com/api/productdetail/getproductdetail/{code}"
-    )
+    # The unofficial frontend endpoint now answers 404 for every product code,
+    # so the HTML pipeline (JSON-LD, then regex) is the only reliable source.
+    api_url_template: ClassVar[str | None] = None
 
     json_product_paths: ClassVar[tuple[tuple[str, ...], ...]] = (
         ("product",),
@@ -109,12 +103,3 @@ class HepsiburadaScraper(BaseScraper):
     html_list_price_patterns: ClassVar[tuple[str, ...]] = HTML_LIST_PRICE_PATTERNS
     html_name_patterns: ClassVar[tuple[str, ...]] = HTML_NAME_PATTERNS
     html_out_of_stock_markers: ClassVar[tuple[str, ...]] = HTML_OUT_OF_STOCK_MARKERS
-
-    def api_url(self, url: str) -> str | None:
-        """Return the frontend JSON endpoint derived from the product code."""
-        if self.api_url_template is None:
-            return None
-        match = PRODUCT_CODE_PATTERN.search(url)
-        if match is None:
-            return None
-        return self.api_url_template.format(code=match.group(1))

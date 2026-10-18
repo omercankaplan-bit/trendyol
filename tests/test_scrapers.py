@@ -89,16 +89,12 @@ def test_normalize_url_strips_query_and_trailing_slash():
     assert normalize_url(TRENDYOL_URL + "?boutiqueId=61") == normalize_url(TRENDYOL_URL + "/")
 
 
-def test_api_url_extracts_the_product_identifier(trendyol: TrendyolScraper, hepsiburada):
-    assert trendyol.api_url(TRENDYOL_URL) == (
-        "https://public.trendyol.com/discovery-web-productgw-service/api/productDetail/123456789"
-    )
-    assert trendyol.api_url("https://www.trendyol.com/sr?q=mont") is None
-
-    hb_api = hepsiburada.api_url(HEPSIBURADA_URL)
-    assert hb_api is not None
-    assert hb_api.endswith("HBCV0000123456")
-    assert hepsiburada.api_url("https://www.hepsiburada.com/ara?q=mont") is None
+def test_scrapers_rely_on_the_html_pipeline(trendyol: TrendyolScraper, hepsiburada):
+    """Both JSON endpoints are gone, so `api_url` must be inert."""
+    assert trendyol.api_url(TRENDYOL_URL) is None
+    assert hepsiburada.api_url(HEPSIBURADA_URL) is None
+    assert find_scraper(TRENDYOL_URL) is not None
+    assert find_scraper(HEPSIBURADA_URL) is not None
 
 
 def test_parse_json_reads_the_saved_trendyol_payload(trendyol: TrendyolScraper):
@@ -208,51 +204,51 @@ def test_parse_html_regex_raises_when_no_price_matches(trendyol: TrendyolScraper
         trendyol.parse_html_regex("<html><body>fiyat yok</body></html>", TRENDYOL_URL)
 
 
-async def test_fetch_prefers_the_json_endpoint(trendyol: TrendyolScraper):
+async def test_fetch_reads_the_embedded_state(trendyol: TrendyolScraper):
     calls: list[str] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
         calls.append(str(request.url))
-        if "public.trendyol.com" in str(request.url):
-            return httpx.Response(200, json=read_json_fixture("trendyol_product.json"))
         return httpx.Response(200, text=read_fixture("trendyol_product.html"))
 
     async with make_client(handler) as http:
         result = await trendyol.fetch(TRENDYOL_URL, client=http)
 
         assert result.price == 1299.0
-        assert result.source == "json"
-        assert len(calls) == 1
+        assert result.product_name == "Columbia Erkek Pike Lake Mont"
+        assert result.source == "json"  # the window state embedded in the HTML
+        assert calls == [TRENDYOL_URL]
         assert http.is_closed is False  # injected clients stay open
 
 
-async def test_fetch_falls_back_to_the_html_document(trendyol: TrendyolScraper):
-    calls: list[str] = []
+async def test_fetch_falls_back_to_json_ld(trendyol: TrendyolScraper):
+    html = (
+        "<html><head>"
+        '<script type="application/ld+json">'
+        '{"@type":"Product","name":"Mont","offers":{"price":"1.234,00","priceCurrency":"TRY"}}'
+        "</script></head><body></body></html>"
+    )
 
     def handler(request: httpx.Request) -> httpx.Response:
-        calls.append(str(request.url))
-        if "public.trendyol.com" in str(request.url):
-            return httpx.Response(404, text="gone")
-        return httpx.Response(200, text=read_fixture("trendyol_product.html"))
+        return httpx.Response(200, text=html)
 
     async with make_client(handler) as http:
         result = await trendyol.fetch(TRENDYOL_URL, client=http)
 
-    assert result.price == 1299.0
-    assert result.source == "json"  # embedded window state, not the regex path
-    assert len(calls) == 2
+    assert result.price == 1234.0
+    assert result.currency == "TRY"
+    assert result.source == "json-ld"
 
 
-async def test_fetch_falls_back_when_the_json_body_is_not_json(trendyol: TrendyolScraper):
+async def test_fetch_falls_back_to_the_html_regex(trendyol: TrendyolScraper):
     def handler(request: httpx.Request) -> httpx.Response:
-        if "public.trendyol.com" in str(request.url):
-            return httpx.Response(200, text="<html>maintenance</html>")
-        return httpx.Response(200, text=read_fixture("trendyol_product.html"))
+        return httpx.Response(200, text=read_fixture("trendyol_product_html_only.html"))
 
     async with make_client(handler) as http:
         result = await trendyol.fetch(TRENDYOL_URL, client=http)
 
-    assert result.price == 1299.0
+    assert result.price == 1999.5
+    assert result.source == "html"
 
 
 async def test_fetch_retries_retryable_status_codes(
@@ -268,8 +264,8 @@ async def test_fetch_retries_retryable_status_codes(
         with pytest.raises(ScraperFetchError):
             await trendyol_fast_retry.fetch(TRENDYOL_URL, client=http)
 
-    # 3 attempts for the JSON endpoint, then 3 more for the HTML document.
-    assert calls["n"] == 6
+    # One URL, so only the three attempts of a single fetch.
+    assert calls["n"] == 3
 
 
 async def test_fetch_does_not_retry_client_errors(
@@ -285,13 +281,11 @@ async def test_fetch_does_not_retry_client_errors(
         with pytest.raises(ScraperFetchError):
             await trendyol_fast_retry.fetch(TRENDYOL_URL, client=http)
 
-    assert calls["n"] == 2  # the API call, then the HTML document
+    assert calls["n"] == 1  # a 404 is final, not retried
 
 
 async def test_fetch_reports_a_parse_error_when_everything_fails(trendyol_fast_retry):
     def handler(request: httpx.Request) -> httpx.Response:
-        if "public.trendyol.com" in str(request.url):
-            return httpx.Response(404, text="gone")
         return httpx.Response(200, text="<html><body>fiyat yok</body></html>")
 
     async with make_client(handler) as http:
@@ -300,9 +294,10 @@ async def test_fetch_reports_a_parse_error_when_everything_fails(trendyol_fast_r
 
 
 async def test_fetch_pipeline_for_hepsiburada(hepsiburada: HepsiburadaScraper):
+    calls: list[str] = []
+
     def handler(request: httpx.Request) -> httpx.Response:
-        if "api/productdetail" in str(request.url):
-            return httpx.Response(200, json=read_json_fixture("hepsiburada_product.json"))
+        calls.append(str(request.url))
         return httpx.Response(200, text=read_fixture("hepsiburada_product.html"))
 
     async with make_client(handler) as http:
@@ -310,19 +305,5 @@ async def test_fetch_pipeline_for_hepsiburada(hepsiburada: HepsiburadaScraper):
 
     assert result.price == 2349.0
     assert result.list_price == 2999.0
-    assert result.source == "json"
-
-
-async def test_fetch_pipeline_for_hepsiburada_html_fallback():
-    scraper = HepsiburadaScraper(min_delay_s=0.0, max_delay_s=0.0, max_retries=1)
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        if "api/productdetail" in str(request.url):
-            return httpx.Response(500, text="boom")
-        return httpx.Response(200, text=read_fixture("hepsiburada_product.html"))
-
-    async with make_client(handler) as http:
-        result = await scraper.fetch(HEPSIBURADA_URL, client=http)
-
-    assert result.price == 2349.0
     assert result.product_name == "The North Face Erkek Resolve Mont"
+    assert calls == [HEPSIBURADA_URL]

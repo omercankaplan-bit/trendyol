@@ -1,22 +1,20 @@
 """Trendyol scraper.
 
-Field knowledge lives in the class constants below. Trendyol ships a public
-(undocumented) JSON product endpoint, and the HTML document additionally
-contains `window.__PRODUCT_DETAIL_APP_INITIAL_STATE__`. Both are tried before
-falling back to regular expressions over the rendered markup.
+Field knowledge lives in the class constants below. The storefront sits behind
+Cloudflare and answers a plain HTTP client with 403 (see
+:mod:`mont_indirim_bot.scrapers.http`), so requests go through a browser
+fingerprint. There is no reachable public JSON product endpoint any more, so the
+pipeline reads the schema.org block (`application/ld+json`) and the
+server-rendered state before falling back to regular expressions over the HTML.
 """
 
 from __future__ import annotations
 
-import re
 from typing import ClassVar
 
 from mont_indirim_bot.scrapers.base import BaseScraper
 
 __all__ = ["TrendyolScraper"]
-
-#: Trendyol product URLs end with `-p-<numeric id>`.
-PRODUCT_ID_PATTERN = re.compile(r"-p-(\d+)")
 
 #: Keys holding the selling price in Trendyol payloads.
 JSON_PRICE_KEYS: tuple[str, ...] = (
@@ -78,9 +76,9 @@ class TrendyolScraper(BaseScraper):
     display_name: ClassVar[str] = "Trendyol"
     host_patterns: ClassVar[tuple[str, ...]] = ("trendyol.com", "*.trendyol.com")
 
-    api_url_template: ClassVar[str | None] = (
-        "https://public.trendyol.com/discovery-web-productgw-service/api/productDetail/{product_id}"
-    )
+    # The public JSON endpoint the frontend used to call no longer resolves, so
+    # the HTML pipeline (JSON-LD, then regex) is the only reliable source.
+    api_url_template: ClassVar[str | None] = None
 
     json_product_paths: ClassVar[tuple[tuple[str, ...], ...]] = (
         ("result", "product"),
@@ -100,12 +98,3 @@ class TrendyolScraper(BaseScraper):
     html_list_price_patterns: ClassVar[tuple[str, ...]] = HTML_LIST_PRICE_PATTERNS
     html_name_patterns: ClassVar[tuple[str, ...]] = HTML_NAME_PATTERNS
     html_out_of_stock_markers: ClassVar[tuple[str, ...]] = HTML_OUT_OF_STOCK_MARKERS
-
-    def api_url(self, url: str) -> str | None:
-        """Return the JSON product endpoint derived from the product id."""
-        if self.api_url_template is None:
-            return None
-        match = PRODUCT_ID_PATTERN.search(url)
-        if match is None:
-            return None
-        return self.api_url_template.format(product_id=match.group(1))

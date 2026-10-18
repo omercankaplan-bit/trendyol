@@ -38,8 +38,8 @@ flowchart TD
     RUN --> CMD["getUpdates<br/>bekleyen komutlar işlenir"]
     RUN --> LOAD["data/watchlist.json + data/state.json okunur"]
     LOAD --> SCAN["her ürün sırayla (en fazla 2 eşzamanlı) çekilir"]
-    SCAN --> HA["Trendyol: JSON endpoint<br/>sonra gömülü JSON, sonra HTML"]
-    SCAN --> HB["Hepsiburada: JSON endpoint<br/>sonra gömülü JSON, sonra HTML"]
+    SCAN --> HA["Trendyol: tarayıcı parmak iziyle indir<br/>JSON-LD, sonra gömülü JSON, sonra HTML"]
+    SCAN --> HB["Hepsiburada: tarayıcı parmak iziyle indir<br/>JSON-LD, sonra gömülü JSON, sonra HTML"]
     HA --> EVAL["tetikleyici + cooldown + re-arm kontrolü"]
     HB --> EVAL
     EVAL -->|"hedef altı ya da ≥ %20 düşüş"| MSG["sendMessage (MarkdownV2)"]
@@ -55,6 +55,19 @@ Sunucu olmadığı için botun "hafızası" repodur:
 | ---------------------- | ---------------------------------------------------------------------------------------- |
 | `data/watchlist.json`  | Takip edilen ürünler: id, link, site, ürün adı, hedef fiyat, ürün bazlı düşüş eşiği       |
 | `data/state.json`      | Son fiyat, en düşük/en yüksek fiyat, fiyat geçmişi, bildirim cooldown'ı, Telegram offset  |
+
+### Neden `httpx` değil `curl_cffi`?
+
+İki site de Cloudflare arkasında ve TLS parmak izine bakarak karar veriyor: normal bir
+HTTP istemcisi (`httpx`), tarayıcı başlıkları birebir gönderilse bile **403** alıyor.
+Bu yüzden scraper'lar `curl_cffi` ile Chrome'un TLS/HTTP2 parmak izini taklit ederek
+istek atıyor (`mont_indirim_bot/scrapers/http.py`). Testler ise ağa hiç çıkmaz; aynı
+arayüzü sağlayan `httpx.MockTransport` istemcisi enjekte edilir.
+
+Ayrıca her iki sitenin eski JSON ürün endpoint'i artık yanıt vermiyor
+(`public.trendyol.com` DNS'te yok, Hepsiburada endpoint'i 404). Bu yüzden fiyat önce
+sayfadaki `application/ld+json` bloğundan, sonra gömülü JS state'inden, en sonunda
+HTML regex'lerinden okunur.
 
 ---
 
@@ -259,6 +272,12 @@ sadece o ürün "error" sayılır, koşu devam eder ve 3 hatadan sonra Telegram'
 - 🔁 Aynı anda tek koşu çalışır (`concurrency: price-check`), yani üst üste binme olmaz.
 - 🧱 Bazı ürünler bot koruması (403) ya da stok dışı durumu nedeniyle okunamayabilir;
   bu durumda ürün hata olarak işaretlenir ve sahibine bildirilir.
+- ☁️ Cloudflare, GitHub Actions'ın veri merkezi IP'lerini zaman zaman engelleyebilir.
+  Böyle bir durumda tarama loglarında `HTTP 403` görürsün; birkaç saat sonra tekrar
+  denemek genelde yeterlidir.
+- 🏷 Trendyol stokta olmayan ürünler için fiyat alanına `999.999 TL` yer tutucusu yazar.
+  Bu yüzden watchlist'e **stokta olan** ürünleri eklemek daha sağlıklıdır (tükenen bir
+  ürün stokta dönerse gerçek fiyatıyla güncellenir).
 - 🚫 Fiyatlar site tarafında "liste fiyatı / indirimli fiyat" olarak farklı gösterilebilir;
   bot ödeme adımındaki kupon/kargo etkisini **hesaba katmaz**.
 
