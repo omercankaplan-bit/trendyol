@@ -157,7 +157,11 @@ class CommandProcessor:
         chat = message.get("chat")
         chat_id = chat.get("id") if isinstance(chat, Mapping) else None
         if chat_id != self._config.telegram_chat_id:
-            LOGGER.debug("Ignoring update from chat %r (not the owner)", chat_id)
+            LOGGER.warning(
+                "Ignoring update from chat %r: it is not the configured owner. "
+                "Set TELEGRAM_CHAT_ID to this value if this is your chat.",
+                chat_id,
+            )
             return None
 
         command = parse_command(message.get("text"))
