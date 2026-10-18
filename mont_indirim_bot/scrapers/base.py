@@ -49,6 +49,9 @@ __all__ = [
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_TIMEOUT_S = 20.0
 
+#: How many characters of an unparsable document are logged (see `_document_head`).
+DOCUMENT_HEAD_CHARS = 160
+
 #: Realistic desktop user agents, rotated per request to avoid a single
 #: recognisable fingerprint.
 DEFAULT_USER_AGENTS: tuple[str, ...] = (
@@ -429,7 +432,15 @@ class BaseScraper(Scraper):
         if json_ld is not None:
             return json_ld
 
-        return self.parse_html_regex(html, url)
+        try:
+            return self.parse_html_regex(html, url)
+        except ScraperParseError:
+            LOGGER.warning(
+                "[%s] no price in the HTML; document starts with: %s",
+                self.name,
+                _document_head(html),
+            )
+            raise
 
     async def _get_json(self, http: HttpClient, url: str) -> Any:
         response = await self._request(http, url)
@@ -675,3 +686,13 @@ def _retry_after_seconds(response: HttpResponse) -> float | None:
         return min(max(float(header), 1.0), 60.0)
     except ValueError:
         return None
+
+
+def _document_head(html: str, limit: int = DOCUMENT_HEAD_CHARS) -> str:
+    """Return a short single-line excerpt of a document, for diagnostics.
+
+    When a storefront answers with a bot challenge instead of a product page the
+    parsers find nothing, and this excerpt is what makes the reason obvious in
+    the logs.
+    """
+    return " ".join(html.split())[:limit]
