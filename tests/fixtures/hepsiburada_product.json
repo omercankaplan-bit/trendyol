@@ -1,0 +1,9 @@
+{
+  "product": {
+    "name": "The North Face Erkek Resolve Mont",
+    "price": { "value": 2349.0, "currency": "TRY" },
+    "originalPrice": { "value": 2999.0, "currency": "TRY" },
+    "inStock": true,
+    "stockCount": 12
+  }
+}

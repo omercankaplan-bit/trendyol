@@ -1,0 +1,14 @@
+{
+  "result": {
+    "product": {
+      "id": 123456789,
+      "name": "Columbia Erkek Pike Lake Mont",
+      "brand": { "name": "Columbia" },
+      "price": { "value": 1299.0, "currency": "TRY" },
+      "listPrice": { "value": 1799.0, "currency": "TRY" },
+      "inStock": true,
+      "stockCount": 24
+    }
+  },
+  "extra": { "trackingId": "abc" }
+}
