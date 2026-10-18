@@ -32,6 +32,7 @@ __all__ = [
     "WatchlistRow",
     "format_added",
     "format_alert",
+    "format_brand_digest",
     "format_check_summary",
     "format_help",
     "format_history",
@@ -195,6 +196,41 @@ def format_alert(alert: Alert) -> str:
     if stamp:
         lines.append(f"🕒 {md_escape(stamp)}")
     return "\n".join(lines)
+
+
+def format_brand_digest(brand_name: str, alerts: Sequence[Alert]) -> str:
+    """Render one brand's discounts as a single message.
+
+    The watchlist answers "what does this product cost now"; this digest answers
+    "what went on sale at this brand", so it groups every movement of a brand
+    into one message instead of sending one alert per product.
+    """
+    lines: list[str] = [
+        f"🏷 *{md_escape(brand_name or 'Marka')}* · {md_escape(f'{len(alerts)} indirim')}",
+    ]
+    for alert in alerts:
+        lines.append("")
+        lines.append(f"📦 *{md_escape(_shorten(alert.title, 70) or 'Bilinmeyen ürün')}*")
+        if alert.old_price is not None:
+            old_price = md_code(format_price(alert.old_price, alert.currency))
+            lines.append(f"💸 {md_escape('Eski fiyat')}: {old_price}")
+        new_price = md_escape(format_price(alert.new_price, alert.currency))
+        drop = (
+            md_escape(f" ({format_percent(alert.discount_pct)})")
+            if alert.discount_pct is not None
+            else ""
+        )
+        lines.append(f"✅ {md_escape('Yeni fiyat')}: *{new_price}*{drop}")
+        if not alert.in_stock:
+            lines.append(f"⚠️ {md_escape('Stok bilgisi belirsiz')}")
+        lines.append(f"🔗 [{md_escape('Ürüne git')}]({md_escape_url(alert.url)})")
+    return "\n".join(lines)
+
+
+def _shorten(text: str, limit: int) -> str:
+    """Trim `text` to `limit` characters, keeping the start."""
+    text = " ".join(text.split())
+    return text if len(text) <= limit else text[: limit - 3].rstrip() + "..."
 
 
 def format_help(site_names: Sequence[str]) -> str:

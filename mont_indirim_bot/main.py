@@ -20,6 +20,7 @@ from collections.abc import Sequence
 
 from mont_indirim_bot.config import Config, ConfigError, load_config
 from mont_indirim_bot.scrapers import default_scrapers
+from mont_indirim_bot.services.brand_scan import BrandScanner
 from mont_indirim_bot.services.commands import CommandProcessor
 from mont_indirim_bot.services.notifier import Notifier
 from mont_indirim_bot.services.price_checker import PriceChecker
@@ -83,6 +84,7 @@ async def run(mode: str, config: Config) -> int:
         max_delay_s=config.request_max_delay_s,
         max_retries=config.max_retries,
         timeout_s=config.request_timeout_s,
+        proxy=config.scraper_proxy,
     )
     telegram = TelegramClient(
         config.telegram_bot_token,
@@ -91,6 +93,7 @@ async def run(mode: str, config: Config) -> int:
     )
     notifier = Notifier(telegram, config.telegram_chat_id)
     checker = PriceChecker(store=store, config=config, scrapers=scrapers, notifier=notifier)
+    brand_scanner = BrandScanner(store=store, config=config, notifier=notifier)
     processor = CommandProcessor(
         store=store, config=config, checker=checker, notifier=notifier, scrapers=scrapers
     )
@@ -102,19 +105,31 @@ async def run(mode: str, config: Config) -> int:
         if mode in {"commands", "both"}:
             await processor.poll_once(telegram)
 
-        if mode in {"check", "both"} and not processor.did_run_check:
-            outcomes = await checker.run()
-            if outcomes:
-                alerts = sum(len(outcome.alerts) for outcome in outcomes)
-                failures = sum(1 for outcome in outcomes if outcome.failed)
+        if mode in {"check", "both"}:
+            if not processor.did_run_check:
+                outcomes = await checker.run()
+                if outcomes:
+                    alerts = sum(len(outcome.alerts) for outcome in outcomes)
+                    failures = sum(1 for outcome in outcomes if outcome.failed)
+                    LOGGER.info(
+                        "Scan finished: %d product(s), %d alert(s), %d failure(s)",
+                        len(outcomes),
+                        alerts,
+                        failures,
+                    )
+                else:
+                    LOGGER.info("Watchlist is empty; nothing to scan")
+
+            brand_outcomes = await brand_scanner.run()
+            if brand_outcomes:
+                brand_alerts = sum(len(outcome.alerts) for outcome in brand_outcomes)
+                brand_failures = sum(1 for outcome in brand_outcomes if outcome.failed)
                 LOGGER.info(
-                    "Scan finished: %d product(s), %d alert(s), %d failure(s)",
-                    len(outcomes),
-                    alerts,
-                    failures,
+                    "Brand scan finished: %d brand(s), %d alert(s), %d failure(s)",
+                    len(brand_outcomes),
+                    brand_alerts,
+                    brand_failures,
                 )
-            else:
-                LOGGER.info("Watchlist is empty; nothing to scan")
     finally:
         await telegram.aclose()
     return EXIT_OK

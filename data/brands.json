@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "budget": 10000.0,
+  "pages": 1,
+  "brands": [
+    {
+      "id": "avva",
+      "name": "AVVA",
+      "query": "avva erkek mont",
+      "match": ["avva"],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "lufian",
+      "name": "Lufian",
+      "query": "lufian erkek mont",
+      "match": ["lufian"],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "columbia",
+      "name": "Columbia",
+      "query": "columbia erkek mont",
+      "match": ["columbia"],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "pierre-cardin",
+      "name": "Pierre Cardin",
+      "query": "pierre cardin erkek mont",
+      "match": ["pierre cardin", "pierrecardin"],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "altinyildiz",
+      "name": "Altınyıldız Classics",
+      "query": "altinyildiz classics erkek mont",
+      "match": ["altinyildiz"],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "lumberjack",
+      "name": "Lumberjack",
+      "query": "lumberjack erkek mont",
+      "match": ["lumberjack"],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "kigili",
+      "name": "Kiğılı",
+      "query": "kiğılı erkek mont",
+      "match": ["kigili"],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "mont-genel",
+      "name": "Mont (tüm markalar)",
+      "query": "erkek mont",
+      "match": [],
+      "category": "jacket",
+      "active": true
+    },
+    {
+      "id": "kiyafet-genel",
+      "name": "Kıyafet (tüm markalar)",
+      "query": "erkek giyim",
+      "match": [],
+      "category": "any",
+      "active": true
+    },
+    {
+      "id": "ayakkabi-genel",
+      "name": "Ayakkabı (tüm markalar)",
+      "query": "erkek ayakkabı",
+      "match": [],
+      "category": "any",
+      "active": true
+    }
+  ]
+}

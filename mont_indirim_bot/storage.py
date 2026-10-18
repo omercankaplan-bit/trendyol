@@ -27,11 +27,14 @@ from mont_indirim_bot.scrapers.base import normalize_url
 LOGGER = logging.getLogger(__name__)
 
 __all__ = [
+    "BRANDS_FILENAME",
     "MAX_HISTORY_ENTRIES",
     "SCHEMA_VERSION",
     "STATE_FILENAME",
     "WATCHLIST_FILENAME",
     "BotState",
+    "BrandScanConfig",
+    "BrandSource",
     "HistoryEntry",
     "ItemState",
     "StorageError",
@@ -48,6 +51,7 @@ __all__ = [
 
 WATCHLIST_FILENAME = "watchlist.json"
 STATE_FILENAME = "state.json"
+BRANDS_FILENAME = "brands.json"
 SCHEMA_VERSION = 1
 
 #: Upper bound for the per-item price history, keeping `data/state.json` small.
@@ -299,6 +303,90 @@ class Watchlist:
 
 
 # --------------------------------------------------------------------------- #
+# Brand scan configuration
+# --------------------------------------------------------------------------- #
+@dataclass(frozen=True, slots=True)
+class BrandSource:
+    """One brand or category whose listing pages the brand scan reads.
+
+    A brand is described by the search query that returns its products, plus
+    the tokens that must appear in a product name for it to count as that
+    brand: sponsored results from other brands show up in the very same page.
+    `category` selects which product names are relevant ("jacket" keeps only
+    outerwear, "any" accepts everything the query returns).
+    """
+
+    id: str
+    name: str
+    query: str
+    match: tuple[str, ...] = ()
+    category: str = "any"
+    active: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to the `brands.json` shape."""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "query": self.query,
+            "match": list(self.match),
+            "category": self.category,
+            "active": self.active,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> BrandSource:
+        """Build a brand source from a possibly incomplete mapping."""
+        raw_match = _as_sequence(data.get("match"))
+        match = tuple(str(token) for token in raw_match if str(token).strip())
+        return cls(
+            id=_as_str(data.get("id")),
+            name=_as_str(data.get("name")),
+            query=_as_str(data.get("query")),
+            match=match,
+            category=_as_str(data.get("category"), "any") or "any",
+            active=_as_bool(data.get("active"), True),
+        )
+
+
+@dataclass(slots=True)
+class BrandScanConfig:
+    """The `data/brands.json` document.
+
+    Products above `budget` are still remembered (a brand's price history is
+    useful), but only a drop that lands *inside* the budget is worth a message.
+    """
+
+    budget: float | None = None
+    pages: int = 1
+    brands: list[BrandSource] = field(default_factory=list)
+
+    def active_brands(self) -> list[BrandSource]:
+        """Brands the scan should visit."""
+        return [brand for brand in self.brands if brand.active and brand.query]
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to the `brands.json` shape."""
+        return {
+            "version": SCHEMA_VERSION,
+            "budget": self.budget,
+            "pages": self.pages,
+            "brands": [brand.to_dict() for brand in self.brands],
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> BrandScanConfig:
+        """Build the brand configuration from a possibly incomplete document."""
+        raw_brands = _as_sequence(_as_mapping(data).get("brands"))
+        brands = [BrandSource.from_dict(_as_mapping(item)) for item in raw_brands]
+        return cls(
+            budget=_as_opt_float(data.get("budget")),
+            pages=max(1, _as_int(data.get("pages"), 1)),
+            brands=[brand for brand in brands if brand.id and brand.query],
+        )
+
+
+# --------------------------------------------------------------------------- #
 # Runtime state
 # --------------------------------------------------------------------------- #
 @dataclass(slots=True)
@@ -415,6 +503,10 @@ class BotState:
     last_error_alert_at: str | None = None
     items: dict[str, ItemState] = field(default_factory=dict)
     history: dict[str, list[HistoryEntry]] = field(default_factory=dict)
+    #: Products seen by the brand scan, keyed by their marketplace product code.
+    #: They share `ItemState` so the drop rule, the cooldown and the re-arm
+    #: behave exactly like they do for the hand-picked watchlist.
+    brand_items: dict[str, ItemState] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to the `state.json` shape."""
@@ -427,6 +519,9 @@ class BotState:
                 item_id: [entry.to_dict() for entry in entries]
                 for item_id, entries in sorted(self.history.items())
             },
+            "brand_items": {
+                code: state.to_dict() for code, state in sorted(self.brand_items.items())
+            },
         }
 
     @classmethod
@@ -434,6 +529,7 @@ class BotState:
         """Build the bot state from a possibly incomplete mapping."""
         raw_items = _as_mapping(_as_mapping(data).get("items"))
         raw_history = _as_mapping(_as_mapping(data).get("history"))
+        raw_brand_items = _as_mapping(_as_mapping(data).get("brand_items"))
         return cls(
             telegram_offset=_as_int(data.get("telegram_offset")),
             last_error_alert_at=_as_opt_str(data.get("last_error_alert_at")),
@@ -447,6 +543,10 @@ class BotState:
                 ]
                 for item_id, entries in raw_history.items()
             },
+            brand_items={
+                str(code): ItemState.from_dict(_as_mapping(state))
+                for code, state in raw_brand_items.items()
+            },
         )
 
 
@@ -454,12 +554,13 @@ class BotState:
 # Store
 # --------------------------------------------------------------------------- #
 class Store:
-    """In-memory view over `data/watchlist.json` and `data/state.json`."""
+    """In-memory view over `data/watchlist.json`, `data/state.json` and `data/brands.json`."""
 
     def __init__(self, data_dir: Path) -> None:
         self.data_dir = Path(data_dir)
         self.watchlist = Watchlist()
         self.state = BotState()
+        self.brands = BrandScanConfig()
         self.loaded = False
 
     @property
@@ -472,19 +573,27 @@ class Store:
         """Absolute path of the state file."""
         return self.data_dir / STATE_FILENAME
 
+    @property
+    def brands_path(self) -> Path:
+        """Absolute path of the brand scan configuration."""
+        return self.data_dir / BRANDS_FILENAME
+
     async def load(self) -> Store:
-        """Read both files, tolerating missing or corrupt documents."""
+        """Read the documents, tolerating missing or corrupt ones."""
         raw_watchlist = await read_json(
             self.watchlist_path, {"version": SCHEMA_VERSION, "items": []}
         )
         raw_state = await read_json(self.state_path, {"version": SCHEMA_VERSION})
+        raw_brands = await read_json(self.brands_path, {"version": SCHEMA_VERSION})
         self.watchlist = Watchlist.from_dict(_as_mapping(raw_watchlist))
         self.state = BotState.from_dict(_as_mapping(raw_state))
+        self.brands = BrandScanConfig.from_dict(_as_mapping(raw_brands))
         self.loaded = True
         LOGGER.info(
-            "Loaded %d watchlist item(s) and %d state entry(ies) from %s",
+            "Loaded %d watchlist item(s), %d state entry(ies) and %d brand(s) from %s",
             len(self.watchlist.items),
             len(self.state.items),
+            len(self.brands.active_brands()),
             self.data_dir,
         )
         return self
@@ -508,6 +617,14 @@ class Store:
         if state is None:
             state = ItemState()
             self.state.items[item_id] = state
+        return state
+
+    def brand_state_for(self, code: str) -> ItemState:
+        """Return (creating if needed) the brand-scan state of a product code."""
+        state = self.state.brand_items.get(code)
+        if state is None:
+            state = ItemState()
+            self.state.brand_items[code] = state
         return state
 
     def history_for(self, item_id: str) -> list[HistoryEntry]:

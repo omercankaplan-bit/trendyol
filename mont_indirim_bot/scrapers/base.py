@@ -14,8 +14,8 @@ import logging
 import random
 import re
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Any, ClassVar
 from urllib.parse import urlsplit, urlunsplit
 
@@ -35,14 +35,17 @@ __all__ = [
     "DEFAULT_USER_AGENTS",
     "BaseScraper",
     "PriceResult",
+    "RequestPolicy",
     "Scraper",
     "ScraperError",
     "ScraperFetchError",
     "ScraperParseError",
+    "browser_headers",
     "extract_json_assignment",
     "extract_json_ld",
     "first_match",
     "normalize_url",
+    "request_with_retries",
     "strip_html",
 ]
 
@@ -478,62 +481,29 @@ class BaseScraper(Scraper):
 
     async def _request(self, http: HttpClient, url: str) -> HttpResponse:
         """GET with politeness delay and exponential backoff on 403/429/5xx."""
-        attempt = 1
-        headers = self._headers()
-        while True:
-            await self._politeness_delay()
-            failure: ScraperFetchError | None = None
-            retry_after: float | None = None
-            try:
-                response = await http.get(url, headers=headers, follow_redirects=True)
-            except NETWORK_ERRORS as exc:
-                failure = ScraperFetchError(f"network error: {type(exc).__name__}")
-            else:
-                if response.status_code in RETRYABLE_STATUS_CODES:
-                    retry_after = _retry_after_seconds(response)
-                    failure = ScraperFetchError(
-                        f"HTTP {response.status_code}", status_code=response.status_code
-                    )
-                elif response.status_code >= 400:
-                    msg = f"HTTP {response.status_code}"
-                    raise ScraperFetchError(msg, status_code=response.status_code)
-                else:
-                    return response
-
-            # Every branch above returns, raises, or assigns `failure`.
-            assert failure is not None
-            if attempt >= self._max_retries:
-                raise failure
-            delay = retry_after or self._backoff_delay(attempt)
-            LOGGER.warning(
-                "[%s] %s for %s; retrying in %.1fs (%d/%d)",
-                self.name,
-                failure,
-                url,
-                delay,
-                attempt + 1,
-                self._max_retries,
-            )
-            await asyncio.sleep(delay)
-            attempt += 1
+        return await request_with_retries(
+            http,
+            url,
+            headers=self._headers(),
+            policy=RequestPolicy(
+                name=self.name,
+                min_delay_s=self._min_delay_s,
+                max_delay_s=self._max_delay_s,
+                max_retries=self._max_retries,
+                rng=self._rng,
+                backoff=self._backoff_delay,
+            ),
+        )
 
     async def _politeness_delay(self) -> None:
-        if self._max_delay_s > 0:
-            await asyncio.sleep(self._rng.uniform(self._min_delay_s, self._max_delay_s))
+        await politeness_delay(self._min_delay_s, self._max_delay_s, self._rng)
 
     def _backoff_delay(self, attempt: int) -> float:
         """Exponential backoff with jitter: ~1s, 2s, 4s (+/- 30%)."""
-        base = 2.0 ** (attempt - 1)
-        return base * self._rng.uniform(0.7, 1.3)
+        return backoff_delay(attempt, self._rng)
 
     def _headers(self) -> dict[str, str]:
-        return {
-            "User-Agent": self._rng.choice(self._user_agents),
-            "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
-            "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
-            "Cache-Control": "no-cache",
-            "DNT": "1",
-        }
+        return browser_headers(self._user_agents, self._rng)
 
     # -- parsing ----------------------------------------------------------- #
     def parse_json(self, payload: Any, url: str) -> PriceResult:
@@ -661,6 +631,103 @@ class BaseScraper(Scraper):
                 if isinstance(nested, bool):
                     return nested
         return True
+
+
+def browser_headers(user_agents: Sequence[str], rng: random.Random) -> dict[str, str]:
+    """The headers a real desktop browser sends to a Turkish shop."""
+    return {
+        "User-Agent": rng.choice(tuple(user_agents) or DEFAULT_USER_AGENTS),
+        "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+        "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
+        "Cache-Control": "no-cache",
+        "DNT": "1",
+    }
+
+
+async def politeness_delay(min_delay_s: float, max_delay_s: float, rng: random.Random) -> None:
+    """Sleep a random amount of time between two requests."""
+    if max_delay_s > 0:
+        await asyncio.sleep(rng.uniform(max(0.0, min_delay_s), max_delay_s))
+
+
+def backoff_delay(attempt: int, rng: random.Random) -> float:
+    """Exponential backoff with jitter: ~1s, 2s, 4s (+/- 30%)."""
+    base = 2.0 ** (max(1, attempt) - 1)
+    return base * rng.uniform(0.7, 1.3)
+
+
+@dataclass(frozen=True, slots=True)
+class RequestPolicy:
+    """How one client talks to a shop: log name, delays and retry budget."""
+
+    name: str
+    min_delay_s: float = 2.0
+    max_delay_s: float = 6.0
+    max_retries: int = DEFAULT_MAX_RETRIES
+    rng: random.Random = field(default_factory=random.Random)
+    #: Override for the wait before a retry (tests use this to skip the sleep).
+    backoff: Callable[[int], float] | None = None
+
+    def wait_after_failure(self, attempt: int) -> float:
+        """Seconds to wait before the retry that follows `attempt`."""
+        if self.backoff is not None:
+            return self.backoff(attempt)
+        return backoff_delay(attempt, self.rng)
+
+
+async def request_with_retries(
+    http: HttpClient,
+    url: str,
+    *,
+    headers: Mapping[str, str],
+    policy: RequestPolicy,
+) -> HttpResponse:
+    """GET `url` with a politeness delay and exponential backoff on 403/429/5xx.
+
+    Shared by the product scrapers and the listing reader of the brand scan so
+    that both respect the same delays and the same retry policy.
+
+    Raises:
+        ScraperFetchError: the request kept failing (or failed with a status
+            that is not worth retrying).
+    """
+    attempt = 1
+    while True:
+        await politeness_delay(policy.min_delay_s, policy.max_delay_s, policy.rng)
+        failure: ScraperFetchError | None = None
+        retry_after: float | None = None
+        try:
+            response = await http.get(url, headers=headers, follow_redirects=True)
+        except NETWORK_ERRORS as exc:
+            failure = ScraperFetchError(f"network error: {type(exc).__name__}")
+        else:
+            if response.status_code in RETRYABLE_STATUS_CODES:
+                retry_after = _retry_after_seconds(response)
+                failure = ScraperFetchError(
+                    f"HTTP {response.status_code}", status_code=response.status_code
+                )
+            elif response.status_code >= 400:
+                msg = f"HTTP {response.status_code}"
+                raise ScraperFetchError(msg, status_code=response.status_code)
+            else:
+                return response
+
+        # Every branch above returns, raises, or assigns `failure`.
+        assert failure is not None
+        if attempt >= policy.max_retries:
+            raise failure
+        delay = retry_after or policy.wait_after_failure(attempt)
+        LOGGER.warning(
+            "[%s] %s for %s; retrying in %.1fs (%d/%d)",
+            policy.name,
+            failure,
+            url,
+            delay,
+            attempt + 1,
+            policy.max_retries,
+        )
+        await asyncio.sleep(delay)
+        attempt += 1
 
 
 def product_id(url: str) -> str | None:

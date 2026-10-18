@@ -92,6 +92,7 @@ max-positional-args = 7
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["ANN001", "ANN201", "ANN202", "PLR2004", "S101", "ASYNC240"]
+"mont_indirim_bot/scrapers/hepsiburada_listing.py" = ["PLR0913"]
 "scripts/*" = ["T201"]
 
 [tool.ruff.lint.isort]

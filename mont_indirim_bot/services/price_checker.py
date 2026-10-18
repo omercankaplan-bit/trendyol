@@ -30,6 +30,14 @@ from mont_indirim_bot.scrapers import (
     find_scraper,
 )
 from mont_indirim_bot.services.notifier import Alert, NotifierProtocol
+from mont_indirim_bot.services.rules import (
+    cooldown_elapsed,
+    drop_percent,
+    mark_notified,
+    rearm_if_recovered,
+    record_measurement,
+    trigger_reasons,
+)
 from mont_indirim_bot.storage import (
     HistoryEntry,
     ItemState,
@@ -41,23 +49,14 @@ from mont_indirim_bot.storage import (
 
 LOGGER = logging.getLogger(__name__)
 
-__all__ = ["ERROR_ALERT_THRESHOLD", "CheckOutcome", "PriceChecker"]
+#: `drop_percent` is re-exported here because the watchlist check has always
+#: exposed it; the shared implementation lives in `services.rules`.
+__all__ = ["ERROR_ALERT_THRESHOLD", "CheckOutcome", "PriceChecker", "drop_percent"]
 
 #: Consecutive failures after which the owner is warned about a broken scraper.
 ERROR_ALERT_THRESHOLD = 3
 
 CheckStatus = Literal["ok", "error"]
-
-
-def drop_percent(old_price: float | None, new_price: float) -> float | None:
-    """Return the percentage drop from `old_price` to `new_price`.
-
-    Returns `None` when there is no usable previous price or when the price did
-    not actually fall.
-    """
-    if old_price is None or old_price <= 0 or new_price >= old_price:
-        return None
-    return (old_price - new_price) / old_price * 100.0
 
 
 @dataclass(slots=True)
@@ -195,14 +194,17 @@ class PriceChecker:
 
         self._update_price_state(item, state, result, now)
         self._update_history(item, state, result, now)
-        self._rearm_if_recovered(state, result.price)
+        if rearm_if_recovered(state, result.price, rearm_pct=self._config.rearm_pct):
+            LOGGER.info("Price recovered above the notified level, triggers re-armed")
 
         reasons = self._trigger_reasons(item, state, result.price, previous_price)
         alerts: list[Alert] = []
-        if reasons and self._cooldown_elapsed(state, now):
+        if reasons and cooldown_elapsed(
+            state, now, cooldown_seconds=self._config.cooldown_hours_seconds
+        ):
             alert = self._build_alert(item, state, scraper, result, previous_price, reasons, now)
             alerts.append(alert)
-            self._mark_notified(state, result.price, reasons, now)
+            mark_notified(state, price=result.price, reasons=reasons, now=now)
             LOGGER.info("Alert for %s: %s", item.id, ", ".join(reasons))
             if send_alerts and self._notifier is not None:
                 await self._notifier.send_alert(alert)
@@ -272,24 +274,18 @@ class PriceChecker:
     def _update_price_state(
         self, item: WatchItem, state: ItemState, result: PriceResult, now: datetime
     ) -> None:
-        state.last_price = result.price
-        state.last_list_price = result.list_price
-        state.last_currency = result.currency
-        state.in_stock = result.in_stock
-        state.last_checked_at = to_iso(now)
-        state.last_success_at = to_iso(now)
-        state.consecutive_errors = 0
-        state.error_alerted = False
-        state.last_error = None
         if result.product_name and result.product_name != state.title:
-            state.title = result.product_name
+            # The shop renamed the product: keep the curated list in sync.
             item.title = result.product_name
             self._watchlist_dirty = True
-        state.lowest_price = (
-            result.price if state.lowest_price is None else min(state.lowest_price, result.price)
-        )
-        state.highest_price = (
-            result.price if state.highest_price is None else max(state.highest_price, result.price)
+        record_measurement(
+            state,
+            price=result.price,
+            list_price=result.list_price,
+            currency=result.currency,
+            in_stock=result.in_stock,
+            title=result.product_name or None,
+            now=now,
         )
 
     def _update_history(
@@ -309,19 +305,6 @@ class PriceChecker:
             ),
         )
 
-    def _rearm_if_recovered(self, state: ItemState, price: float) -> None:
-        """Re-arm a trigger once the price climbed back above the notified level."""
-        reference = state.last_notified_price
-        if reference is None:
-            return
-        threshold = reference * (1.0 + max(0.0, self._config.rearm_pct) / 100.0)
-        if price < threshold:
-            return
-        if not state.armed_target or not state.armed_drop:
-            LOGGER.info("Price recovered above the notified level, triggers re-armed")
-        state.armed_target = True
-        state.armed_drop = True
-
     def _trigger_reasons(
         self,
         item: WatchItem,
@@ -329,36 +312,18 @@ class PriceChecker:
         price: float,
         previous_price: float | None,
     ) -> list[str]:
-        reasons: list[str] = []
-        if item.target_price is not None and state.armed_target and price <= item.target_price:
-            reasons.append("target")
         threshold = (
             item.min_discount_pct
             if item.min_discount_pct is not None
             else self._config.min_discount_pct
         )
-        drop = drop_percent(previous_price, price)
-        if state.armed_drop and drop is not None and drop >= threshold:
-            reasons.append("drop")
-        return reasons
-
-    def _cooldown_elapsed(self, state: ItemState, now: datetime) -> bool:
-        last_notified = state.last_notified_datetime
-        if last_notified is None:
-            return True
-        elapsed = (now - last_notified).total_seconds()
-        return elapsed >= self._config.cooldown_hours_seconds
-
-    def _mark_notified(
-        self, state: ItemState, price: float, reasons: Sequence[str], now: datetime
-    ) -> None:
-        state.last_notified_at = to_iso(now)
-        state.last_notified_price = price
-        state.last_notified_reasons = list(reasons)
-        if "target" in reasons:
-            state.armed_target = False
-        if "drop" in reasons:
-            state.armed_drop = False
+        return trigger_reasons(
+            state,
+            price=price,
+            previous_price=previous_price,
+            threshold_pct=threshold,
+            target_price=item.target_price,
+        )
 
     def _build_alert(
         self,

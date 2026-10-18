@@ -22,8 +22,10 @@ durumu repoya geri commit eder ve kapanır.
   yeniden düşmedikçe aynı indirimi ikinci kez bildirmez.
 - 💬 Telegram'dan ürün ekleyip çıkarabilir, hedef fiyatı değiştirebilir, fiyat geçmişini
   görebilirsin (`/ekle`, `/liste`, `/sil`, `/esik`, `/gecmis`, `/kontrol`).
-- 🧾 Fiyat geçmişi ve tüm durum `data/*.json` içinde, yani **repoda** tutulur ve her
-  çalışmadan sonra otomatik commit edilir.
+- 🏷 Ürünlerin yanı sıra, `data/brands.json`'da tanımlı markaların (Avva, Lufian, Columbia,
+  Pierre Cardin, Altınyıldız, Lumberjack, Kiğılı) listing sayfalarını okur ve bu markalardaki
+  **yeni indirimleri marka bazında toplu mesaj** olarak bildirir. Ürün yayından kalksa bile
+  tarama devam eder; zaten takip edilen ürünler ayrıca izlenmez.
 
 ---
 
@@ -55,6 +57,7 @@ Sunucu olmadığı için botun "hafızası" repodur:
 | ---------------------- | ---------------------------------------------------------------------------------------- |
 | `data/watchlist.json`  | Takip edilen ürünler: id, link, site, ürün adı, hedef fiyat, ürün bazlı düşüş eşiği       |
 | `data/state.json`      | Son fiyat, en düşük/en yüksek fiyat, fiyat geçmişi, bildirim cooldown'ı, Telegram offset  |
+| `data/brands.json`     | Marka taraması: takip edilen markalar, arama sorgusu, marka eşleşme anahtarları, bütçe     |
 
 ### Neden `httpx` değil `curl_cffi`?
 
