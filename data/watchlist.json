@@ -9,7 +9,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "ab6d05",
@@ -19,7 +19,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "05c121",
@@ -29,7 +29,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "8c2ae5",
@@ -39,7 +39,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "a3483f",
@@ -49,7 +49,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "c3c580",
@@ -59,7 +59,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "798c11",
@@ -69,7 +69,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "e398d7",
@@ -79,7 +79,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "28caa0",
@@ -89,7 +89,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:38:19+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "b4a813",
@@ -129,7 +129,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:43:54+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "0a6169",
@@ -139,7 +139,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:43:54+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "054a1c",
@@ -149,7 +149,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:43:54+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "28b3a9",
@@ -159,7 +159,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:43:54+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "b95b50",
@@ -169,7 +169,7 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:43:54+00:00",
-      "active": true
+      "active": false
     },
     {
       "id": "7aec31",
@@ -179,6 +179,126 @@
       "target_price": null,
       "min_discount_pct": null,
       "added_at": "2026-10-18T17:43:54+00:00",
+      "active": false
+    },
+    {
+      "id": "741a63",
+      "url": "https://www.hepsiburada.com/avva-erkek-siyah-klasik-yaka-suet-dokulu-mevsimlik-comfort-fit-mont-a42y6076-p-HBCV000076QF9D",
+      "site": "hepsiburada",
+      "title": "AVVA Erkek Siyah Klasik Yaka Süet Dokulu Mevsimlik Comfort Fit Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:25+00:00",
+      "active": true
+    },
+    {
+      "id": "5a76a7",
+      "url": "https://www.hepsiburada.com/avva-erkek-mavi-klasik-yaka-suet-dokulu-mevsimlik-comfort-fit-mont-a41y6011-p-HBCV000065K2EO",
+      "site": "hepsiburada",
+      "title": "AVVA Erkek Mavi Klasik Yaka Süet Dokulu Mevsimlik Comfort Fit Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:28+00:00",
+      "active": true
+    },
+    {
+      "id": "22f7f8",
+      "url": "https://www.hepsiburada.com/avva-erkek-ekru-bomber-yaka-su-itici-ruzgar-gecirmez-hafif-mevsimlik-comfort-fit-mont-a61y6059-p-HBCV0000CHR671",
+      "site": "hepsiburada",
+      "title": "AVVA Erkek Ekru Bomber Yaka Su İtici Rüzgar Geçirmez Hafif Mevsimlik Comfort Fit Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:31+00:00",
+      "active": true
+    },
+    {
+      "id": "cf0406",
+      "url": "https://www.hepsiburada.com/avva-erkek-siyah-kapusonlu-su-itici-ruzgar-gecirmez-cikarilabilir-sisme-yelekli-comfort-fit-mevsimlik-mont-a42y6100-p-HBCV0000778RK0",
+      "site": "hepsiburada",
+      "title": "AVVA Erkek Siyah Kapüşonlu Su İtici Rüzgar Geçirmez Çıkarılabilir Şişme Yelekli Comfort Fit",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:35+00:00",
+      "active": true
+    },
+    {
+      "id": "dddba9",
+      "url": "https://www.hepsiburada.com/lufian-mark-erkek-mont-lacivert-p-HBCV0000605JHJ",
+      "site": "hepsiburada",
+      "title": "Lufian Mark Erkek Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:38+00:00",
+      "active": true
+    },
+    {
+      "id": "cc5356",
+      "url": "https://www.hepsiburada.com/lufian-mark-erkek-mont-haki-p-HBCV00006EB7MR",
+      "site": "hepsiburada",
+      "title": "Lufian Mark Erkek Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:42+00:00",
+      "active": true
+    },
+    {
+      "id": "08e528",
+      "url": "https://www.hepsiburada.com/lufian-alex-erkek-mont-siyah-p-HBCV00008E3QNO",
+      "site": "hepsiburada",
+      "title": "Lufian Alex Erkek Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:45+00:00",
+      "active": true
+    },
+    {
+      "id": "8666d5",
+      "url": "https://www.hepsiburada.com/lufian-sergio-kaz-tuyu-erkek-mont-lacivert-p-HBCV00006JYEHP",
+      "site": "hepsiburada",
+      "title": "Lufian Sergıo Kaz Tüyü Erkek Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:49+00:00",
+      "active": true
+    },
+    {
+      "id": "43446d",
+      "url": "https://www.hepsiburada.com/altinyildiz-classics-erkek-lacivert-standart-fit-normal-kesim-dik-yaka-mont-p-HBCV00008ZODC0",
+      "site": "hepsiburada",
+      "title": "Altınyıldız Classics Erkek Lacivert Standart Fit Normal Kesim Dik Yaka",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:54+00:00",
+      "active": true
+    },
+    {
+      "id": "a808e7",
+      "url": "https://www.hepsiburada.com/altinyildiz-classics-erkek-siyah-standart-fit-normal-kesim-ruzgar-gecirmez-kapusonlu-dik-yaka-mont-trenckot-p-HBCV0000585VJJ",
+      "site": "hepsiburada",
+      "title": "Altınyıldız Classics Erkek Siyah Standart Fit Normal Kesim Rüzgar Geçirmez Kapüşonlu Dik Yaka Mont",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:27:56+00:00",
+      "active": true
+    },
+    {
+      "id": "cf5feb",
+      "url": "https://www.hepsiburada.com/lumberjack-m-brt-plus-coat-2pr-gri-erkek-mont-p-HBCV00003GFIHO",
+      "site": "hepsiburada",
+      "title": "Lumberjack M-Brt Plus Coat 2pr Gri Erkek",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:28:00+00:00",
+      "active": true
+    },
+    {
+      "id": "0b3ec3",
+      "url": "https://www.hepsiburada.com/lumberjack-sn21-perry-coat-1pr-bordo-erkek-mont-p-HBCV00000RXPLB",
+      "site": "hepsiburada",
+      "title": "Lumberjack SN21 Perry Coat 1pr Bordo Erkek",
+      "target_price": null,
+      "min_discount_pct": null,
+      "added_at": "2026-10-18T18:28:04+00:00",
       "active": true
     }
   ]
