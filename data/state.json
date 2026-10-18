@@ -2,6 +2,521 @@
   "version": 1,
   "telegram_offset": 733193437,
   "last_error_alert_at": null,
-  "items": {},
-  "history": {}
+  "items": {
+    "054a1c": {
+      "last_price": 5999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Mavi Su İtici Kapüşonlu Gri Şişme Mont 0110675-70074",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:23+00:00",
+      "last_success_at": "2026-10-18T17:45:23+00:00",
+      "lowest_price": 5999.99,
+      "highest_price": 5999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "05c121": {
+      "last_price": 9999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Avva Erkek Kahve Bomber Yaka, Etek, Kol ve Yaka Triko Ribana, Fleto Cepli Yünlü Kaşe Mont A62Y6014",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:44:52+00:00",
+      "last_success_at": "2026-10-18T17:44:52+00:00",
+      "lowest_price": 9999.99,
+      "highest_price": 9999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "07c574": {
+      "last_price": 3294.11,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Altınyıldız Classics Rüzgar Geçirmez Taşınabilir Çantalı Sıcak Tutan Hafif Standart Fit Elyaf",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:17+00:00",
+      "last_success_at": "2026-10-18T17:45:17+00:00",
+      "lowest_price": 3294.11,
+      "highest_price": 3294.11,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "0a6169": {
+      "last_price": 6599.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Jack & Jones Jack&Jones Jjsarenne Skı Erkek Mont 12284702",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:20+00:00",
+      "last_success_at": "2026-10-18T17:45:20+00:00",
+      "lowest_price": 6599.99,
+      "highest_price": 6599.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "28b3a9": {
+      "last_price": 5499.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Mavi Erkek Siyah M0110352-900 Şişme Mont",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:24+00:00",
+      "last_success_at": "2026-10-18T17:45:24+00:00",
+      "lowest_price": 5499.99,
+      "highest_price": 5499.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "28caa0": {
+      "last_price": 9999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "LUFIAN 27K JOSEP ERKEK MONT",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:06+00:00",
+      "last_success_at": "2026-10-18T17:45:06+00:00",
+      "lowest_price": 9999.99,
+      "highest_price": 9999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "36484f": {
+      "last_price": 3050.0,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Solognac Erkek Su Geçirmez Kışlık Mont -10 °C - Siyah - Avcılık ve Doğa Gözlemi -",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:15+00:00",
+      "last_success_at": "2026-10-18T17:45:15+00:00",
+      "lowest_price": 3050.0,
+      "highest_price": 3050.0,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "6182cc": {
+      "last_price": 1998.0,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Lumberjack 3W Ml Henry Coat 2Sn17 3Pr Erkek Siyah Mont",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:11+00:00",
+      "last_success_at": "2026-10-18T17:45:11+00:00",
+      "lowest_price": 1998.0,
+      "highest_price": 1998.0,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "798c11": {
+      "last_price": 7410.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Avva Erkek Nil Yeşili Çıkarılabilir Kapüşonlu Kürklü %100 Kaz Tüyü Su İtici Rüzgar Geçirmez -10 Dereceye",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:01+00:00",
+      "last_success_at": "2026-10-18T17:45:01+00:00",
+      "lowest_price": 7410.99,
+      "highest_price": 7410.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "7aec31": {
+      "last_price": 3994.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "AC&Co / Altınyıldız Classics Erkek Haki Soğuk Geçirmez Mont Kaban Standart Fit Normal Kesim Kapüşonlu Dik Yaka Yan Cepli",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:30+00:00",
+      "last_success_at": "2026-10-18T17:45:30+00:00",
+      "lowest_price": 3994.99,
+      "highest_price": 3994.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "8c2ae5": {
+      "last_price": 9999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Avva Erkek Siyah Su İtici Ribana Detaylı İnce Hafif Comfort Fit Mont A62Y6065",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:44:55+00:00",
+      "last_success_at": "2026-10-18T17:44:55+00:00",
+      "lowest_price": 9999.99,
+      "highest_price": 9999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "a3483f": {
+      "last_price": 9999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Avva Erkek Siyah Kapüşonlu Yaka Hafif -5 Dereceye Kadar Dayanıklı Comfort Fit Mont A62Y6212",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:44:56+00:00",
+      "last_success_at": "2026-10-18T17:44:56+00:00",
+      "lowest_price": 9999.99,
+      "highest_price": 9999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "ab6d05": {
+      "last_price": 9999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Avva Erkek Taş Dik Yaka %100 Ördek Tüyü Hafif Rüzgar Geçirmez Comfort Fit Mont A62Y6066",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:44:49+00:00",
+      "last_success_at": "2026-10-18T17:44:49+00:00",
+      "lowest_price": 9999.99,
+      "highest_price": 9999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "b4a813": {
+      "last_price": 999.0,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Kiğılı Dik Yaka Fermuarlı Cepli Rüzgara Dayanıklı Sıcak Tutan Kapitone Spor",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:10+00:00",
+      "last_success_at": "2026-10-18T17:45:10+00:00",
+      "lowest_price": 999.0,
+      "highest_price": 999.0,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "b95b50": {
+      "last_price": 4419.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "AC&Co / Altınyıldız Classics Erkek Lacivert Sıcak Tutan Dolgulu Standart Fit Dik Yaka Kapüşonlu Yan Cepli Casual Mont",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:29+00:00",
+      "last_success_at": "2026-10-18T17:45:29+00:00",
+      "lowest_price": 4419.99,
+      "highest_price": 4419.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "c3c580": {
+      "last_price": 8999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Avva Erkek Mavi Bomber Yaka Süet Dokulu Mevsimlik Comfort Fit Mont B006045",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:44:59+00:00",
+      "last_success_at": "2026-10-18T17:44:59+00:00",
+      "lowest_price": 8999.99,
+      "highest_price": 8999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "e30a35": {
+      "last_price": 9999.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Avva Erkek Lacivert Ördek Tüyü Kapüşonlu Yaka Su İtici Comfort Fit Mont A62Y6187",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:44:48+00:00",
+      "last_success_at": "2026-10-18T17:44:48+00:00",
+      "lowest_price": 9999.99,
+      "highest_price": 9999.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "e398d7": {
+      "last_price": 7599.05,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "LUFIAN Tommy Kaz Tüyü Erkek Mont Turuncu",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:05+00:00",
+      "last_success_at": "2026-10-18T17:45:05+00:00",
+      "lowest_price": 7599.05,
+      "highest_price": 7599.05,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    },
+    "ed0a8a": {
+      "last_price": 9404.99,
+      "last_list_price": null,
+      "last_currency": "TRY",
+      "title": "Jack & Jones JPRCCMOON PARKA SN Black 12280904-BL",
+      "in_stock": true,
+      "last_checked_at": "2026-10-18T17:45:18+00:00",
+      "last_success_at": "2026-10-18T17:45:18+00:00",
+      "lowest_price": 9404.99,
+      "highest_price": 9404.99,
+      "consecutive_errors": 0,
+      "error_alerted": false,
+      "last_error": null,
+      "last_notified_at": null,
+      "last_notified_price": null,
+      "last_notified_reasons": [],
+      "armed_target": true,
+      "armed_drop": true
+    }
+  },
+  "history": {
+    "054a1c": [
+      {
+        "at": "2026-10-18T17:45:23+00:00",
+        "price": 5999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "05c121": [
+      {
+        "at": "2026-10-18T17:39:27+00:00",
+        "price": 9999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "07c574": [
+      {
+        "at": "2026-10-18T17:39:55+00:00",
+        "price": 3294.11,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "0a6169": [
+      {
+        "at": "2026-10-18T17:45:20+00:00",
+        "price": 6599.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "28b3a9": [
+      {
+        "at": "2026-10-18T17:45:24+00:00",
+        "price": 5499.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "28caa0": [
+      {
+        "at": "2026-10-18T17:39:45+00:00",
+        "price": 9999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "36484f": [
+      {
+        "at": "2026-10-18T17:40:02+00:00",
+        "price": 3050.0,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "6182cc": [
+      {
+        "at": "2026-10-18T17:39:55+00:00",
+        "price": 1998.0,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "798c11": [
+      {
+        "at": "2026-10-18T17:39:37+00:00",
+        "price": 7410.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "7aec31": [
+      {
+        "at": "2026-10-18T17:45:30+00:00",
+        "price": 3994.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "8c2ae5": [
+      {
+        "at": "2026-10-18T17:39:28+00:00",
+        "price": 9999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "a3483f": [
+      {
+        "at": "2026-10-18T17:39:33+00:00",
+        "price": 9999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "ab6d05": [
+      {
+        "at": "2026-10-18T17:39:25+00:00",
+        "price": 9999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "b4a813": [
+      {
+        "at": "2026-10-18T17:39:49+00:00",
+        "price": 999.0,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "b95b50": [
+      {
+        "at": "2026-10-18T17:45:29+00:00",
+        "price": 4419.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "c3c580": [
+      {
+        "at": "2026-10-18T17:39:36+00:00",
+        "price": 8999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "e30a35": [
+      {
+        "at": "2026-10-18T17:39:22+00:00",
+        "price": 9999.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "e398d7": [
+      {
+        "at": "2026-10-18T17:39:42+00:00",
+        "price": 7599.05,
+        "list_price": null,
+        "in_stock": true
+      }
+    ],
+    "ed0a8a": [
+      {
+        "at": "2026-10-18T17:45:18+00:00",
+        "price": 9404.99,
+        "list_price": null,
+        "in_stock": true
+      }
+    ]
+  }
 }
