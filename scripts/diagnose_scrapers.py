@@ -19,13 +19,16 @@ from collections.abc import Sequence
 
 from curl_cffi.requests import AsyncSession
 
-#: Product pages plus one search page per storefront.
+#: Product pages plus one search page per storefront, and the Akakce listing.
 URLS: tuple[str, ...] = (
     "https://www.trendyol.com/avva/erkek-siyah-bomber-yaka-suet-dokulu-mevsimlik-"
     "comfort-fit-mont-b006045-p-835456121",
     "https://www.trendyol.com/sr?q=erkek%20mont",
     "https://www.hepsiburada.com/kigili-dik-yaka-fermuarli-cepli-ruzgara-dayanikli-"
     "sicak-tutan-kapitone-spor-mont-p-HBCV0000C5J4DB",
+    "https://www.akakce.com/mont.html",
+    "https://www.akakce.com/mont/en-ucuz-suvari-mn2008700316-erkek-kapitone-mont-"
+    "fiyati,280542423.html",
 )
 
 #: Browser builds to try; a mismatch here is often why a site answers oddly.
@@ -39,6 +42,8 @@ MARKERS: tuple[str, ...] = (
     "prc-dsc",
     "add-to-basket",
     "Tükendi",
+    "Just a moment",  # Cloudflare's interstitial instead of the page
+    "akakce.com",  # Akakce's own markup (the listing pages)
 )
 
 PRICE_PATTERN = re.compile(r"\d[\d.]*,\d{2}\s*TL")
